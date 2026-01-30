@@ -1,4 +1,6 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import multer from 'multer';
 import fs from 'fs/promises';
@@ -13,15 +15,19 @@ const GEMINI_MODEL = 'gemini-2.5-flash';
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
 
 
+console.log(process.env.GOOGLE_API_KEY);
 app.post('/generate-text', async (req, res) => {
     const { prompt } = req.body;
 
     try {
         const response = await ai.models.generateContent({
             model: GEMINI_MODEL,
+            // config: {
+            //     systemInstruction:"You are a cat. Your name is Neko. end text with miauw",
+            // },
             contents: prompt
         });
 
@@ -60,7 +66,7 @@ app.post('/generate-from-document', upload.single('document'), async (req, res) 
         const response = await ai.models.generateContent({
             model: GEMINI_MODEL,
             contents: [
-                { text: prompt ?? "Tolong buat ringkasan dari dokumen berikut.", type: "text" },
+                { text: prompt ?? "Please make a summary of the following document.", type: "text" },
                 { inlineData: { mimeType: req.file.mimetype, data: base64Document } }
             ]
         });
@@ -80,7 +86,7 @@ app.post('/generate-from-audio', upload.single('audio'), async (req, res) => {
         const response = await ai.models.generateContent({
             model: GEMINI_MODEL,
             contents: [
-                { text: prompt ?? "Tolong buatkan transkrip dari rekaman berikut.", type: "text" },
+                { text: prompt ?? "Please make a transcript of the following recording.", type: "text" },
                 { inlineData: { mimeType: req.file.mimetype, data: base64Audio } }
             ]
         });
